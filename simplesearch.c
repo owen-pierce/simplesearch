@@ -253,49 +253,56 @@ if (event.type == KeyPress) {
     char buffer[10];
     int len = XLookupString(&event.xkey, buffer, sizeof(buffer), &key, NULL);
 
-    if (key == XK_Return) {
-        if (input_len > 0) {
-            // Extract the binary (first word) and arguments (rest of the input)
-            char *binary = strtok(input, " ");  // First word is the binary
-            char *args = strtok(NULL, "");      // Everything after the binary
+if (key == XK_Return) {
+    if (input_len > 0) {
+        char *binary = NULL;
+        char *args = strtok(NULL, "");  // Everything after the binary
 
-            if (binary && (result_list.count > 0 || strlen(binary) > 0)) {
-                // Prepare the command with the selected binary and arguments
-                char *cmd = malloc(MAX_INPUT_LENGTH);
-                if (args) {
-                    snprintf(cmd, MAX_INPUT_LENGTH, "%s %s", binary, args);  // Binary + arguments
-                } else {
-                    snprintf(cmd, MAX_INPUT_LENGTH, "%s", binary);           // Only binary (no arguments)
+        if (result_list.count > 0) {
+            // If there are suggestions, use the first suggestion as the binary
+            binary = result_list.items[0];
+        } else {
+            // Use the user's input if no suggestions are available
+            binary = strtok(input, " ");  
+        }
+
+        if (binary && strlen(binary) > 0) {
+            // Prepare the command with the selected binary and arguments
+            char *cmd = malloc(MAX_INPUT_LENGTH);
+            if (args) {
+                snprintf(cmd, MAX_INPUT_LENGTH, "%s %s", binary, args);  // Binary + arguments
+            } else {
+                snprintf(cmd, MAX_INPUT_LENGTH, "%s", binary);           // Only binary (no arguments)
+            }
+
+            printf("Executing: %s\n", cmd);
+
+            // Fork to execute the command
+            pid_t pid = fork();
+            if (pid == 0) {
+                // In child process: Execute the command via shell
+                execlp("/bin/sh", "sh", "-c", cmd, (char *)NULL);
+                perror("execlp failed"); // If exec fails
+                free(cmd);               // Free cmd in the child process
+                exit(1);                 // Exit if exec fails
+            } else if (pid > 0) {
+                // Parent process: wait for the child to exit and clean up
+                free(cmd);  // Free command string after use
+
+                // Clean up resources and exit after execution
+                for (int i = 0; i < result_list.count; i++) {
+                    free(result_list.items[i]);
                 }
-
-                printf("Executing: %s\n", cmd);
-
-                // Fork to execute the command
-                pid_t pid = fork();
-                if (pid == 0) {
-                    // In child process: Execute the command via shell
-                    execlp("/bin/sh", "sh", "-c", cmd, (char *)NULL);
-                    perror("execlp failed"); // If exec fails
-                    free(cmd);               // Free cmd in the child process
-                    exit(1);                 // Exit if exec fails
-                } else if (pid > 0) {
-                    // Parent process waits for the child to complete
-                    //wait(NULL);
-                    free(cmd);  // Free command string after use
-
-                    // Clean up resources and exit after execution
-                    for (int i = 0; i < result_list.count; i++) {
-                        free(result_list.items[i]);
-                    }
-                    XFreeGC(display, gc);
-                    XDestroyWindow(display, window);
-                    XCloseDisplay(display);
-                    exit(0);
-                } else {
-                    perror("fork failed");
-                }
+                XFreeGC(display, gc);
+                XDestroyWindow(display, window);
+                XCloseDisplay(display);
+                exit(0);
+            } else {
+                perror("fork failed");
             }
         }
+    }
+
     } else if (key == XK_Escape) {
         // Exit the program when Esc is pressed
         for (int i = 0; i < result_list.count; i++) {
