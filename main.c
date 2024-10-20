@@ -26,7 +26,7 @@ int main() {
 
     screen = DefaultScreen(display);
     int screen_width = DisplayWidth(display, screen);
-    int screen_height = DisplayHeight(display, screen);
+    //int screen_height = DisplayHeight(display, screen); //unused var
     int window_height = FONT_SIZE + TOP_PADDING + BOTTOM_PADDING;
 
     window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, screen_width, window_height, 0,
