@@ -1,4 +1,4 @@
-#include "menu.h"
+#include "draw_utils.h"
 #include "config.h"
 
 void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *result_list, XFontStruct *font) {

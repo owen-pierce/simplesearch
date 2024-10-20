@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #include "path_utils.h"
-#include "menu.h"
+#include "draw_utils.h"
 #include "config.h"
 
 int main() {

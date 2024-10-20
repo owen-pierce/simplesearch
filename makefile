@@ -8,7 +8,7 @@ CFLAGS = -Wall -Wextra -O2
 LIBS = -lX11
 
 # Source files
-SRCS = main.c menu.c path_utils.c
+SRCS = main.c draw_utils.c path_utils.c
 
 # Object files
 OBJS = $(SRCS:.c=.o)
