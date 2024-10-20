@@ -53,4 +53,6 @@ Heavily inspired by dmenu
 - Fix known issues
 - Allow for user-defined font
 - Change spacing offset
-- Allow for multi-tab command cycle
+
+## Possible Changes
+- In the future, I may implement a multi-tab command cycling feature. This would involve rewriting the current tab autocomplete functionality. Instead of completing the command immediately when the tab key is pressed, it would highlight the first suggestion and allow users to cycle through multiple options by pressing tab repeatedly before selecting the desired command.
