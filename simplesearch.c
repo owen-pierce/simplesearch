@@ -163,7 +163,6 @@ void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *
     XFlush(display);
 }
 
-
 void ensure_window_focus(Display *display, Window window) {
     // Raise the window to the top and ensure it has keyboard focus
     XRaiseWindow(display, window);
@@ -214,7 +213,7 @@ int main() {
     XSetFont(display, gc, font->fid);
     XSetForeground(display, gc, BlackPixel(display, screen));
 
-    XSetWindowBackground(display, window, 0xAAAAAA);
+    XSetWindowBackground(display, window, WINDOW_BG_COLOR);
     XClearWindow(display, window);
 
     char input[MAX_INPUT_LENGTH] = {0};
