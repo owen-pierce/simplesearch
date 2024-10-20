@@ -1,4 +1,5 @@
 #include "menu.h"
+#include "config.h"
 
 void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *result_list, XFontStruct *font) {
     XClearWindow(display, window);

@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#define MAX_RESULTS 20
+#include "config.h"
 
 typedef struct {
     int count;

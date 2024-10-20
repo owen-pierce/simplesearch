@@ -8,9 +8,7 @@
 
 #include "path_utils.h"
 #include "menu.h"
-
-#define MAX_INPUT_LENGTH 256
-#define TIMEOUT_SECONDS 5
+#include "config.h"
 
 int main() {
     Display *display;

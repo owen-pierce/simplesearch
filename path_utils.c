@@ -1,4 +1,5 @@
 #include "path_utils.h"
+#include "config.h"
 
 // Function implementations
 // Function to get paths from $PATH
