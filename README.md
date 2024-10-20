@@ -48,9 +48,7 @@ Heavily inspired by dmenu
 - BG Suggestion color doesn't format correctly
 
 ## Project Goals
-- Add make files
 - Add debug option
-- Rewrite code comments
 - Fix known issues
 - Allow for user-defined font
 - Change spacing offset
