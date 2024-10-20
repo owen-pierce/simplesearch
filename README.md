@@ -1,2 +1,33 @@
-# simplesearch
-A simple X window search program that looks through the PATH variable for applications to execute.
+# SimpleSearch
+
+**SimpleSearch** is a lightweight X11 window application designed to simplify the process of searching for and executing binaries in your system's `PATH` variable. With features like tab autocompletion and customizable user-defined variables (like colors), it offers a user-friendly interface for quickly running your favorite applications.
+
+## Features
+
+- **Search for Binaries:** Easily search for all binaries available in your `PATH`.
+- **Tab Autocomplete:** Use the tab key to autocomplete binary names, making it faster to find what you need.
+- **User-Defined Variables:** Customize your interface with user-defined variables, such as colors, to suit your preferences.
+- **Easy Execution:** Select and run the desired binary directly from the interface.
+
+## Requirements
+
+- X11
+- gcc
+
+## Installation
+
+To install SimpleSearch, follow these steps:
+
+   ```bash
+   git clone https://github.com/yourusername/simplesearch.git
+   cd simplesearch
+   gcc simplesearch.c -o simplesearch -lX11
+   ./simplesearch
+   ```
+## Add a Shortcut
+
+In GNOME or any other DE you can set a shortcut to launch it like ALT+P
+
+## Inspiration
+
+Heavily inspired by dmenu
