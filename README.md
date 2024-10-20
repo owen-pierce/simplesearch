@@ -18,10 +18,19 @@
 
 To install SimpleSearch, follow these steps:
 
+1. Clone it
    ```bash
    git clone https://github.com/yourusername/simplesearch.git
+   ```
+2. Compile it
+   ```bash
    cd simplesearch
+   ```
+   ```bash
    gcc simplesearch.c -o simplesearch -lX11
+   ```
+3. Run it!
+   ```bash
    ./simplesearch
    ```
 ## Add a Shortcut
