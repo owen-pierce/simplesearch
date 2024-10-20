@@ -40,3 +40,18 @@ In GNOME or any other DE you can set a shortcut to launch it like ALT+P
 ## Inspiration
 
 Heavily inspired by dmenu
+
+## Known Issues
+
+- Writing a valid command, hitting space, then backspace causes the valid command to show on the list
+- The window can sometimes lose focus resulting in an unusable application which will autoclose or can be manually killed
+- BG Suggestion color doesn't format correctly
+
+## Project Goals
+- Add make files
+- Add debug option
+- Rewrite code comments
+- Fix known issues
+- Allow for user-defined font
+- Change spacing offset
+- Allow for multi-tab command cycle
