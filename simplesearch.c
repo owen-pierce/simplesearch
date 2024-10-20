@@ -116,10 +116,7 @@ void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *
     XSetWindowBackground(display, window, WINDOW_BG_COLOR);
     XClearWindow(display, window);
 
-    // Define padding values
-    int top_padding = 10;      // Padding above the input
-    int bottom_padding = 10;   // Padding below the input
-    int line_height = font->ascent + font->descent + top_padding + bottom_padding; // Total line height with padding
+    int line_height = font->ascent + font->descent + TOP_PADDING + BOTTOM_PADDING; // Total line height with padding
 
     int input_len = strlen(input);
     int input_width = XTextWidth(font, input, input_len);  // Get width of the input text
@@ -128,7 +125,7 @@ void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *
     XSetForeground(display, gc, INPUT_TEXT_COLOR);
 
     // Draw the input text with padding
-    XDrawString(display, window, gc, 10, top_padding + font->ascent, input, input_len); // Adjust y position
+    XDrawString(display, window, gc, 10, TOP_PADDING + font->ascent, input, input_len); // Adjust y position
 
     if (result_list->count > 0) {
         // Starting position for the suggestions, pushed to the right of the input text
@@ -150,13 +147,13 @@ void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *
             // Draw background for the selected suggestion
             if (i == result_list->selected) {
                 XSetForeground(display, gc, SUGGESTION_BG_COLOR);
-                XFillRectangle(display, window, gc, x_pos - SUGGESTION_OFFSET, top_padding + font->ascent - bottom_padding, suggestion_width + SUGGESTION_OFFSET * 2, line_height); // Adjusted y position for selection
+                XFillRectangle(display, window, gc, x_pos - SUGGESTION_OFFSET, TOP_PADDING + font->ascent - BOTTOM_PADDING, suggestion_width + SUGGESTION_OFFSET * 2, line_height); // Adjusted y position for selection
                 //XSetForeground(display, gc, BlackPixel(display, 0));  // Switch back to black for the text
             }
             XSetForeground(display, gc, SUGGESTION_TEXT_COLOR);
 
             // Draw the suggestion text
-            XDrawString(display, window, gc, x_pos, top_padding + font->ascent, result_list->items[i], suggestion_len);
+            XDrawString(display, window, gc, x_pos, TOP_PADDING + font->ascent, result_list->items[i], suggestion_len);
 
             // Update x_pos to the right for the next suggestion, leaving a gap
             x_pos += suggestion_width + SUGGESTION_OFFSET;
