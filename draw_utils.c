@@ -1,61 +1,72 @@
 #include "draw_utils.h"
 #include "config.h"
 
+// Draw menu with suggestions and highlights for the selected item
 void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *result_list, XFontStruct *font) {
-    XClearWindow(display, window);
-
+    // Clear the window and set the background color
     XSetWindowBackground(display, window, WINDOW_BG_COLOR);
     XClearWindow(display, window);
 
-    int line_height = font->ascent + font->descent + TOP_PADDING + BOTTOM_PADDING; // Total line height with padding
+    // Calculate line height with padding (for each suggestion)
+    int line_height = font->ascent + font->descent + TOP_PADDING + BOTTOM_PADDING;
 
+    // Get the width of the input text to place suggestions correctly
     int input_len = strlen(input);
-    int input_width = XTextWidth(font, input, input_len);  // Get width of the input text
+    int input_width = XTextWidth(font, input, input_len);
 
-    // Set foreground color for input text
+    // Set the foreground color for input text
     XSetForeground(display, gc, INPUT_TEXT_COLOR);
 
-    // Draw the input text with padding
-    XDrawString(display, window, gc, 10, TOP_PADDING + font->ascent, input, input_len); // Adjust y position
+    // Draw the input text at the top-left corner of the window
+    XDrawString(display, window, gc, 10, TOP_PADDING + font->ascent, input, input_len);
 
     if (result_list->count > 0) {
-        // Starting position for the suggestions, pushed to the right of the input text
-        int x_pos = 10 + input_width + SUGGESTION_OFFSET;  // Leave some space between the input and suggestions
+        // Starting position for suggestions (right of the input text, with extra gap)
+        int x_pos = 10 + input_width + INPUT_TO_SUGGESTION_GAP;  // Increased gap here
 
-        // Get screen width for bounds checking
+        // Get screen width for boundary checks
         int screen_width = DisplayWidth(display, DefaultScreen(display));
 
-        // Draw each suggestion
+        // Loop through suggestions
         for (int i = 0; i < result_list->count; i++) {
             int suggestion_len = strlen(result_list->items[i]);
             int suggestion_width = XTextWidth(font, result_list->items[i], suggestion_len);
 
-            // Check if drawing this suggestion would exceed the screen width
+            // Stop if the suggestion exceeds the screen width
             if (x_pos + suggestion_width + SUGGESTION_OFFSET > screen_width) {
-                break; // Stop drawing further suggestions if they would exceed the screen width
+                break;
             }
 
-            // Draw background for the selected suggestion
+#ifdef ENABLE_HIGHLIGHT
+            // Draw background for the selected suggestion (only if highlighting is enabled)
             if (i == result_list->selected) {
+                // Set the background color for the selected suggestion
                 XSetForeground(display, gc, SUGGESTION_BG_COLOR);
-                XFillRectangle(display, window, gc, x_pos - SUGGESTION_OFFSET, TOP_PADDING + font->ascent - BOTTOM_PADDING, suggestion_width + SUGGESTION_OFFSET * 2, line_height); // Adjusted y position for selection
-                //XSetForeground(display, gc, BlackPixel(display, 0));  // Switch back to black for the text
+
+                // Draw a filled rectangle behind the selected suggestion (adjust y position and width)
+                int rect_y = TOP_PADDING; // Align with the top padding
+                XFillRectangle(display, window, gc, x_pos - SUGGESTION_OFFSET, rect_y, suggestion_width + SUGGESTION_OFFSET * 2, line_height);
             }
+#endif
+            // Set foreground color for suggestion text
             XSetForeground(display, gc, SUGGESTION_TEXT_COLOR);
 
             // Draw the suggestion text
             XDrawString(display, window, gc, x_pos, TOP_PADDING + font->ascent, result_list->items[i], suggestion_len);
 
-            // Update x_pos to the right for the next suggestion, leaving a gap
-            x_pos += suggestion_width + SUGGESTION_OFFSET;
+            // Move the x position for the next suggestion (leave larger gap)
+            x_pos += suggestion_width + SUGGESTION_OFFSET * 3;  // Increased gap between suggestions
         }
     }
 
+    // Flush changes to the display
     XFlush(display);
 }
 
+
+
+// Ensure the window has focus and raise it to the top
 void ensure_window_focus(Display *display, Window window) {
-    // Raise the window to the top and ensure it has keyboard focus
     XRaiseWindow(display, window);
     XSetInputFocus(display, window, RevertToParent, CurrentTime);
 }
