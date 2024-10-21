@@ -46,12 +46,9 @@ Heavily inspired by dmenu
 
 - Writing a valid command, hitting space, then backspace causes the valid command to show on the list
 - The window can sometimes lose focus resulting in an unusable application which will autoclose or can be manually killed
-- BG Suggestion color doesn't format correctly
 
 ## Project Goals
-- Fix known issues
 - Allow for user-defined font
-- Change spacing offset
 
 ## Possible Changes
 - In the future, I may implement a multi-tab command cycling feature. This would involve rewriting the current tab autocomplete functionality. Instead of completing the command immediately when the tab key is pressed, it would highlight the first suggestion and allow users to cycle through multiple options by pressing tab repeatedly before selecting the desired command.
