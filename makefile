@@ -3,9 +3,11 @@ CC = gcc
 
 # Compiler flags
 CFLAGS = -Wall -Wextra -O2
+CFLAGS += -I/usr/include/freetype2
+LDFLAGS += -lX11 -lXft -lfontconfig -lfreetype
 
 # X11 library
-LIBS = -lX11
+LIBS = -lX11 -lXft
 
 # Source files
 SRCS = main.c draw_utils.c path_utils.c

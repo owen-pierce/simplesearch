@@ -47,8 +47,5 @@ Heavily inspired by dmenu
 - Writing a valid command, hitting space, then backspace causes the valid command to show on the list
 - The window can sometimes lose focus resulting in an unusable application which will autoclose or can be manually killed
 
-## Project Goals
-- Allow for user-defined font
-
 ## Possible Changes
 - In the future, I may implement a multi-tab command cycling feature. This would involve rewriting the current tab autocomplete functionality. Instead of completing the command immediately when the tab key is pressed, it would highlight the first suggestion and allow users to cycle through multiple options by pressing tab repeatedly before selecting the desired command.

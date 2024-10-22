@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 // Window and display configurations
-#define FONT_SIZE 32                 // Font size for input and suggestions
+#define FONT_SIZE 20                // Font size for input and suggestions
 #define TOP_PADDING 10               // Padding above text
 #define BOTTOM_PADDING 10            // Padding below text
 #define SUGGESTION_OFFSET 10         // Space between suggestions
@@ -17,10 +17,13 @@
 #define MAX_RESULTS 20               // Maximum number of results to display
 
 // Color configurations (RGB Hex format)
-#define INPUT_TEXT_COLOR 0x000000     // Color for the input text (black)
-#define SUGGESTION_TEXT_COLOR 0xFFFFFF // Color for suggestion text (white)
+#define INPUT_TEXT_COLOR 0xFFFFFF     // Color for the input text (black)
+#define SUGGESTION_TEXT_COLOR 0x0000FF // Color for suggestion text (white)
 #define SUGGESTION_BG_COLOR 0xB9B9B9   // Background color for the selected suggestion (dark gray)
-#define WINDOW_BG_COLOR 0xA9A9A9       // Background color for the window (light gray)
+#define WINDOW_BG_COLOR 0x000000      // Background color for the window (light gray)
+
+// Define a custom font as a macro (you can change this value to any font name)
+#define CUSTOM_FONT "MesloLGS NF Regular"
 
 // User-defined timeout (in seconds)
 #define TIMEOUT_SECONDS 7             // Time in seconds for user-defined timeout

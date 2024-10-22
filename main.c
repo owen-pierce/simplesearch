@@ -1,6 +1,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
+#include <X11/Xft/Xft.h>  // Xft headers for modern font loading
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +21,16 @@ void debug_print(const char *msg) {
     }
 }
 
+// Function to convert hex color to XRenderColor
+XRenderColor hex_to_xrendercolor(unsigned int hex) {
+    return (XRenderColor) {
+        .red = ((hex >> 16) & 0xFF) * 0xFFFF / 255,
+        .green = ((hex >> 8) & 0xFF) * 0xFFFF / 255,
+        .blue = (hex & 0xFF) * 0xFFFF / 255,
+        .alpha = 0xFFFF
+    };
+}
+
 int main(int argc, char *argv[]) {
     // Parse command-line arguments for the -d (debug) flag
     for (int i = 1; i < argc; i++) {
@@ -34,7 +45,9 @@ int main(int argc, char *argv[]) {
     XEvent event;
     int screen;
     GC gc;
-    XFontStruct *font;
+    XftFont *font;
+    XftDraw *draw;
+    XftColor input_xft_color, suggestion_xft_color;
 
     display = XOpenDisplay(NULL);
     if (display == NULL) {
@@ -48,8 +61,12 @@ int main(int argc, char *argv[]) {
     int screen_width = DisplayWidth(display, screen);
     int window_height = FONT_SIZE + TOP_PADDING + BOTTOM_PADDING;
 
+    // Use the WINDOW_BG_COLOR defined in config.h for the window background
+    unsigned long bg_pixel = WINDOW_BG_COLOR; 
+    unsigned long fg_pixel = INPUT_TEXT_COLOR; // Use input text color
+
     window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, screen_width, window_height, 0,
-                                 WhitePixel(display, screen), BlackPixel(display, screen));
+                                 fg_pixel, bg_pixel);
 
     XSetWindowAttributes attributes;
     attributes.override_redirect = True;
@@ -60,14 +77,28 @@ int main(int argc, char *argv[]) {
     debug_print("Window created and mapped.");
 
     gc = XCreateGC(display, window, 0, NULL);
-    char font_name[256];
-    snprintf(font_name, sizeof(font_name), "-adobe-courier-medium-r-normal--%d-0-0-0-p-0-iso8859-1", FONT_SIZE);
-    font = XLoadQueryFont(display, font_name);
+
+    // Initialize XftColor for input text color
+    XRenderColor render_color = hex_to_xrendercolor(INPUT_TEXT_COLOR);
+    XftColorAllocValue(display, DefaultVisual(display, screen), DefaultColormap(display, screen), &render_color, &input_xft_color);
+
+    // Initialize XftColor for suggestion text color
+    XRenderColor suggestion_render_color = hex_to_xrendercolor(SUGGESTION_TEXT_COLOR);
+    XftColorAllocValue(display, DefaultVisual(display, screen), DefaultColormap(display, screen), &suggestion_render_color, &suggestion_xft_color);
+
+    // Create an XftDraw object for drawing the font
+    draw = XftDrawCreate(display, window, DefaultVisual(display, screen), DefaultColormap(display, screen));
+
+    // Define the desired font with size included in the font name
+    char font_desc[256];
+    snprintf(font_desc, sizeof(font_desc), "%s:pixelsize=%d", CUSTOM_FONT, FONT_SIZE);  // Set the desired size
+    
+    // Load the custom font using XftFontOpenName
+    font = XftFontOpenName(display, screen, font_desc);
     if (!font) {
-        fprintf(stderr, "Unable to load font: %s. Using default font.\n", font_name);
-        font = XLoadQueryFont(display, "fixed");
+        fprintf(stderr, "Unable to load font: %s\n", font_desc);
+        exit(1);
     }
-    XSetFont(display, gc, font->fid);
 
     debug_print("Font loaded and applied.");
 
@@ -94,7 +125,9 @@ int main(int argc, char *argv[]) {
             XNextEvent(display, &event);
 
             if (event.type == Expose) {
-                draw_menu(display, window, gc, input, &result_list, font);
+                // Redraw the menu with current input and suggestions
+                XClearWindow(display, window);
+                draw_menu(display, window, gc, input, &result_list, font, draw, &input_xft_color, &suggestion_xft_color);
                 debug_print("Expose event triggered.");
             }
 
@@ -198,16 +231,20 @@ int main(int argc, char *argv[]) {
                     search_binaries(input, &result_list);
                 }
 
-                draw_menu(display, window, gc, input, &result_list, font);
+                // Use draw_menu for redrawing the menu with updated input
+                XClearWindow(display, window);
+                draw_menu(display, window, gc, input, &result_list, font, draw, &input_xft_color, &suggestion_xft_color);
             }
         } else {
             ensure_window_focus(display, window);
         }
     }
 
-    for (int i = 0; i < result_list.count; i++) {
-        free(result_list.items[i]);
-    }
+    // Cleanup
+    XftFontClose(display, font);
+    XftDrawDestroy(draw);
+    XftColorFree(display, DefaultVisual(display, screen), DefaultColormap(display, screen), &input_xft_color);
+    XftColorFree(display, DefaultVisual(display, screen), DefaultColormap(display, screen), &suggestion_xft_color);
     XFreeGC(display, gc);
     XDestroyWindow(display, window);
     XCloseDisplay(display);
