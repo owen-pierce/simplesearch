@@ -137,53 +137,55 @@ int main(int argc, char *argv[]) {
                 char buffer[10];
                 int len = XLookupString(&event.xkey, buffer, sizeof(buffer), &key, NULL);
 
-                if (key == XK_Return) {
-                    debug_print("Return key pressed.");
-                    if (input_len > 0) {
-                        char *binary = NULL;
-                        char *args = strtok(NULL, "");  // Everything after the binary
+if (key == XK_Return) {
+    debug_print("Return key pressed.");
+    if (input_len > 0) {
+        char *binary = NULL;
+        char *args = NULL;
 
-                        if (result_list.count > 0) {
-                            // If there are suggestions, use the first suggestion as the binary
-                            binary = result_list.items[0];
-                        } else {
-                            // Use the user's input if no suggestions are available
-                            binary = strtok(input, " ");
-                        }
+        // Split input into binary and arguments using first space as separator
+        binary = strtok(input, " ");
+        args = strtok(NULL, "");  // Get the rest of the input as arguments
 
-                        if (binary && strlen(binary) > 0) {
-                            char *cmd = malloc(MAX_INPUT_LENGTH);
-                            if (args) {
-                                snprintf(cmd, MAX_INPUT_LENGTH, "%s %s", binary, args);  // Binary + arguments
-                            } else {
-                                snprintf(cmd, MAX_INPUT_LENGTH, "%s", binary);           // Only binary (no arguments)
-                            }
+        if (result_list.count > 0) {
+            // If there are suggestions, use the first suggestion as the binary
+            binary = result_list.items[0];
+        }
 
-                            printf("Executing: %s\n", cmd);
-                            debug_print("Forking to execute command.");
+        if (binary && strlen(binary) > 0) {
+            char *cmd = malloc(MAX_INPUT_LENGTH);
+            if (args) {
+                snprintf(cmd, MAX_INPUT_LENGTH, "%s %s", binary, args);  // Binary + arguments
+            } else {
+                snprintf(cmd, MAX_INPUT_LENGTH, "%s", binary);           // Only binary (no arguments)
+            }
 
-                            pid_t pid = fork();
-                            if (pid == 0) {
-                                // In child process: Execute the command via shell
-                                execlp("/bin/sh", "sh", "-c", cmd, (char *)NULL);
-                                perror("execlp failed");
-                                free(cmd);
-                                exit(1);
-                            } else if (pid > 0) {
-                                free(cmd);
+            printf("Executing: %s\n", cmd);
+            debug_print("Forking to execute command.");
 
-                                for (int i = 0; i < result_list.count; i++) {
-                                    free(result_list.items[i]);
-                                }
-                                XFreeGC(display, gc);
-                                XDestroyWindow(display, window);
-                                XCloseDisplay(display);
-                                exit(0);
-                            } else {
-                                perror("fork failed");
-                            }
-                        }
-                    }
+            pid_t pid = fork();
+            if (pid == 0) {
+                // In child process: Execute the command via shell
+                execlp("/bin/sh", "sh", "-c", cmd, (char *)NULL);
+                perror("execlp failed");
+                free(cmd);
+                exit(1);
+            } else if (pid > 0) {
+                free(cmd);
+
+                // Clean up and exit
+                for (int i = 0; i < result_list.count; i++) {
+                    free(result_list.items[i]);
+                }
+                XFreeGC(display, gc);
+                XDestroyWindow(display, window);
+                XCloseDisplay(display);
+                exit(0);
+            } else {
+                perror("fork failed");
+            }
+        }
+    }
                 } else if (key == XK_Escape) {
                     debug_print("Escape key pressed. Exiting.");
                     for (int i = 0; i < result_list.count; i++) {

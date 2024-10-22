@@ -2,9 +2,9 @@
 #define CONFIG_H
 
 // Window and display configurations
-#define FONT_SIZE 20                // Font size for input and suggestions
-#define TOP_PADDING 10               // Padding above text
-#define BOTTOM_PADDING 10            // Padding below text
+#define FONT_SIZE 24                // Font size for input and suggestions
+#define TOP_PADDING 2               // Padding above text
+#define BOTTOM_PADDING 0            // Padding below text
 #define SUGGESTION_OFFSET 10         // Space between suggestions
 // Define a larger gap between input text and suggestions
 #define INPUT_TO_SUGGESTION_GAP 20 // Increase this to move suggestions further from input

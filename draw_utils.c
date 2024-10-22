@@ -3,7 +3,7 @@
 #include <X11/Xft/Xft.h>  // Include Xft headers for modern font handling
 
 // Draw menu with suggestions and highlights for the selected item using Xft for font rendering
-void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *result_list, XftFont *font, XftDraw *draw, XftColor *xft_color, XftColor *suggestion_bg_color) {
+void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *result_list, XftFont *font, XftDraw *draw, XftColor *input_xft_color, XftColor *suggestion_bg_color) {
     // Clear the window and set the background color
     XSetWindowBackground(display, window, WINDOW_BG_COLOR);
     XClearWindow(display, window);
@@ -18,7 +18,7 @@ void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *
     int input_width = extents.width;
 
     // Draw the input text at the top-left corner of the window using XftDrawStringUtf8
-    XftDrawStringUtf8(draw, xft_color, font, 10, line_height/2 + TOP_PADDING/2, (XftChar8 *)input, input_len);
+    XftDrawStringUtf8(draw, input_xft_color, font, 10, line_height/2 + TOP_PADDING/2, (XftChar8 *)input, input_len);
 
     if (result_list->count > 0) {
         // Starting position for suggestions (right of the input text, with extra gap)
