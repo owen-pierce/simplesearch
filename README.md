@@ -14,6 +14,7 @@
 - X11
 - gcc
 - make
+- libxinerama-dev
 
 ## Installation
 
