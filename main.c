@@ -1,7 +1,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
-#include <X11/Xft/Xft.h>  // Xft headers for modern font loading
+#include <X11/Xft/Xft.h>
+#include <X11/extensions/Xinerama.h>
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,8 +66,45 @@ int main(int argc, char *argv[]) {
     unsigned long bg_pixel = WINDOW_BG_COLOR; 
     unsigned long fg_pixel = INPUT_TEXT_COLOR; // Use input text color
 
-    window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, screen_width, window_height, 0,
-                                 fg_pixel, bg_pixel);
+    // window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, screen_width, window_height, 0,
+    //                              fg_pixel, bg_pixel);
+
+// Get Xinerama information to find the primary monitor
+    int xinerama_major_version, xinerama_minor_version;
+    int num_monitors;
+    XineramaScreenInfo *screens = NULL;
+
+    if (XineramaQueryExtension(display, &xinerama_major_version, &xinerama_minor_version) && XineramaIsActive(display)) {
+        screens = XineramaQueryScreens(display, &num_monitors);
+
+        if (screens && num_monitors > 0) {
+            debug_print("Xinerama is active.");
+
+            // Default to the first screen in case we can't find the primary one
+            int primary_screen = 0;
+            int primary_x = screens[primary_screen].x_org;
+            int primary_y = screens[primary_screen].y_org;
+            int primary_width = screens[primary_screen].width;
+            int primary_height = screens[primary_screen].height;
+
+            // If you want to check for the monitor with the largest area or some other criteria,
+            // you could loop through the monitors to choose a different one. However, usually,
+            // the first one returned by Xinerama is the "primary" monitor in most setups.
+
+            // Center the window on the primary monitor
+            int window_x = primary_x;
+            int window_y = primary_y;
+
+            window = XCreateSimpleWindow(display, RootWindow(display, screen), window_x, window_y, primary_width, window_height, 0,
+                                         fg_pixel, bg_pixel);
+        }
+    } else {
+        debug_print("Xinerama is not available or inactive.");
+
+        // Default to creating the window on the default screen if Xinerama is not active
+        window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, screen_width, window_height, 0,
+                                     fg_pixel, bg_pixel);
+    }
 
     XSetWindowAttributes attributes;
     attributes.override_redirect = True;
