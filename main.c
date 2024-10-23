@@ -258,11 +258,8 @@ if (key == XK_Return) {
                 if (first_space) {
                     result_list.count = 0;  // No suggestions after the first argument
                 }
-                if (is_full_match(input, &result_list) || (strchr(input, ' ') && input[input_len - 1] == ' ')) {
-                    result_list.count = 0;
-                } else {
-                    search_binaries(input, &result_list);
-                }
+
+                search_binaries(input, &result_list);
 
                 // Use draw_menu for redrawing the menu with updated input
                 XClearWindow(display, window);

@@ -45,7 +45,6 @@ Heavily inspired by dmenu
 
 ## Known Issues
 
-- Writing a valid command, hitting space, then backspace causes the valid command to show on the list
 - The window can sometimes lose focus resulting in an unusable application which will autoclose or can be manually killed
 
 ## Possible Changes
