@@ -66,9 +66,6 @@ int main(int argc, char *argv[]) {
     unsigned long bg_pixel = WINDOW_BG_COLOR; 
     unsigned long fg_pixel = INPUT_TEXT_COLOR; // Use input text color
 
-    // window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, screen_width, window_height, 0,
-    //                              fg_pixel, bg_pixel);
-
 // Get Xinerama information to find the primary monitor
     int xinerama_major_version, xinerama_minor_version;
     int num_monitors;
@@ -86,10 +83,6 @@ int main(int argc, char *argv[]) {
             int primary_y = screens[primary_screen].y_org;
             int primary_width = screens[primary_screen].width;
             int primary_height = screens[primary_screen].height;
-
-            // If you want to check for the monitor with the largest area or some other criteria,
-            // you could loop through the monitors to choose a different one. However, usually,
-            // the first one returned by Xinerama is the "primary" monitor in most setups.
 
             // Center the window on the primary monitor
             int window_x = primary_x;
