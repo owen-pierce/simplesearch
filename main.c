@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     unsigned long bg_pixel = WINDOW_BG_COLOR; 
     unsigned long fg_pixel = INPUT_TEXT_COLOR; // Use input text color
 
-// Get Xinerama information to find the primary monitor
+    // Get Xinerama information to find the primary monitor
     int xinerama_major_version, xinerama_minor_version;
     int num_monitors;
     XineramaScreenInfo *screens = NULL;
@@ -136,6 +136,7 @@ int main(int argc, char *argv[]) {
     char input[MAX_INPUT_LENGTH] = {0};
     int input_len = 0;
     ResultList result_list = {0};
+    result_list.selected = -1;  // Initialize selected index to -1
 
     ensure_window_focus(display, window);
     debug_print("Window focus ensured.");
@@ -168,80 +169,64 @@ int main(int argc, char *argv[]) {
                 char buffer[10];
                 int len = XLookupString(&event.xkey, buffer, sizeof(buffer), &key, NULL);
 
-if (key == XK_Return) {
-    debug_print("Return key pressed.");
-    if (input_len > 0) {
-        char *binary = NULL;
-        char *args = NULL;
+                if (key == XK_Return) {
+                    debug_print("Return key pressed.");
+                    if (input_len > 0) {
+                        char *binary = NULL;
+                        char *args = NULL;
 
-        // Split input into binary and arguments using first space as separator
-        binary = strtok(input, " ");
-        args = strtok(NULL, "");  // Get the rest of the input as arguments
+                        // Split input into binary and arguments using first space as separator
+                        binary = strtok(input, " ");
+                        args = strtok(NULL, "");  // Get the rest of the input as arguments
 
-        if (result_list.count > 0) {
-            // If there are suggestions, use the first suggestion as the binary
-            binary = result_list.items[0];
-        }
+                        if (result_list.selected >= 0 && result_list.selected < result_list.count) {
+                            // If a suggestion is selected, use it as the binary
+                            binary = result_list.items[result_list.selected];
+                        }
 
-        if (binary && strlen(binary) > 0) {
-            char *cmd = malloc(MAX_INPUT_LENGTH);
-            if (args) {
-                snprintf(cmd, MAX_INPUT_LENGTH, "%s %s", binary, args);  // Binary + arguments
-            } else {
-                snprintf(cmd, MAX_INPUT_LENGTH, "%s", binary);           // Only binary (no arguments)
-            }
+                        if (binary && strlen(binary) > 0) {
+                            char *cmd = malloc(MAX_INPUT_LENGTH);
+                            if (args) {
+                                snprintf(cmd, MAX_INPUT_LENGTH, "%s %s", binary, args);  // Binary + arguments
+                            } else {
+                                snprintf(cmd, MAX_INPUT_LENGTH, "%s", binary);           // Only binary (no arguments)
+                            }
 
-            printf("Executing: %s\n", cmd);
-            debug_print("Forking to execute command.");
+                            printf("Executing: %s\n", cmd);
+                            debug_print("Forking to execute command.");
 
-            pid_t pid = fork();
-            if (pid == 0) {
-                // In child process: Execute the command via shell
-                execlp("/bin/sh", "sh", "-c", cmd, (char *)NULL);
-                perror("execlp failed");
-                free(cmd);
-                exit(1);
-            } else if (pid > 0) {
-                free(cmd);
+                            pid_t pid = fork();
+                            if (pid == 0) {
+                                // In child process: Execute the command via shell
+                                execlp("/bin/sh", "sh", "-c", cmd, (char *)NULL);
+                                perror("execlp failed");
+                                free(cmd);
+                                exit(1);
+                            } else if (pid > 0) {
+                                free(cmd);
 
-                // Clean up and exit
-                for (int i = 0; i < result_list.count; i++) {
-                    free(result_list.items[i]);
-                }
-                XFreeGC(display, gc);
-                XDestroyWindow(display, window);
-                XCloseDisplay(display);
-                exit(0);
-            } else {
-                perror("fork failed");
-            }
-        }
-    }
+                                // Clean up and exit
+                                for (int i = 0; i < result_list.count; i++) {
+                                    free(result_list.items[i]);
+                                }
+                                XFreeGC(display, gc);
+                                XDestroyWindow(display, window);
+                                XCloseDisplay(display);
+                                exit(0);
+                            } else {
+                                perror("fork failed");
+                            }
+                        }
+                    }
                 } else if (key == XK_Escape) {
                     debug_print("Escape key pressed. Exiting.");
-                    for (int i = 0; i < result_list.count; i++) {
-                        free(result_list.items[i]);
-                    }
-                    XFreeGC(display, gc);
-                    XDestroyWindow(display, window);
-                    XCloseDisplay(display);
-                    exit(0);
+                    break;  // Exit on escape
                 } else if (key == XK_Tab) {
                     debug_print("Tab key pressed for autocomplete.");
                     if (result_list.count > 0) {
                         strncpy(input, result_list.items[0], MAX_INPUT_LENGTH - 1);
                         input[MAX_INPUT_LENGTH - 1] = '\0';
                         input_len = strlen(input);
-                    }
-                } else if (key == XK_Down) {
-                    debug_print("Down key pressed to cycle suggestions.");
-                    if (result_list.selected < result_list.count - 1) {
-                        result_list.selected++;
-                    }
-                } else if (key == XK_Up) {
-                    debug_print("Up key pressed to cycle suggestions.");
-                    if (result_list.selected > 0) {
-                        result_list.selected--;
                     }
                 } else if (key == XK_BackSpace) {
                     if (input_len > 0) {
@@ -252,13 +237,29 @@ if (key == XK_Return) {
                     input[input_len++] = buffer[0];
                     input[input_len] = '\0';
                     debug_print("Character entered.");
-                }
+                } else if (key == XK_Right) {
+    debug_print("Right arrow key pressed.");
+    if (result_list.count > 0) {
+        // Move selection to the next suggestion
+        result_list.selected = (result_list.selected + 1) % result_list.count;
+        debug_print(result_list.items[result_list.selected]); // Print currently selected suggestion
+    }
+} else if (key == XK_Left) {
+    debug_print("Left arrow key pressed.");
+    if (result_list.count > 0) {
+        // Move selection to the previous suggestion
+        result_list.selected = (result_list.selected - 1 + result_list.count) % result_list.count;
+        debug_print(result_list.items[result_list.selected]); // Print currently selected suggestion
+    }
+}
 
+                // Reset suggestion list if there is a space
                 char *first_space = strchr(input, ' ');
                 if (first_space) {
                     result_list.count = 0;  // No suggestions after the first argument
                 }
 
+                // Perform a search for binaries matching the current input
                 search_binaries(input, &result_list);
 
                 // Use draw_menu for redrawing the menu with updated input

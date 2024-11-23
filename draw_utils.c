@@ -45,7 +45,7 @@ void draw_menu(Display *display, Window window, GC gc, char *input, ResultList *
                 XSetForeground(display, gc, SUGGESTION_BG_COLOR);
 
                 // Draw a filled rectangle behind the selected suggestion (adjust y position and width)
-                int rect_y = TOP_PADDING; // Align with the top padding
+                int rect_y = TOP_PADDING - 10; // Align with the top padding
                 XFillRectangle(display, window, gc, x_pos - SUGGESTION_OFFSET, rect_y, suggestion_width + SUGGESTION_OFFSET * 2, line_height);
             }
 #endif
